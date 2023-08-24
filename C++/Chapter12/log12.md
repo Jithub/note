@@ -38,3 +38,48 @@ Stock pStock = new Stock(also);
 # 12.2 改进后的新String类
 *C++98中字面值0有两个含义：可以表示数字值零，也可以表示空指针。有些使用`(void*)0`有些使用`NULL`，C++11提供新关键字`nullptr`。* **再看一次<https://blog.csdn.net/qq_38410730/article/details/105183769>**
 
+静态类成员函数与静态数据成员有类似之处。
+- 不能通过对象调用静态成员函数，后者甚至不能用this指针。如果静态成员函数是在公有部分声明，可以使用类名+作用域解析运算符来调用。
+- 静态成员函数不与特定对象关联，因此只能使用静态数据成员。
+
+**P441页清单12.4 12.5给出了功能较为完整的String类的实现。**
+<br><br>
+
+# 12.3 在构造函数中使用new时应注意的事项
+- 构造中有new，则析构中应有delete；
+- new和delete必须相互兼容。new对应delete，new[]对应delete[]；
+- 如果有多个构造函数，则必须以相同的方式使用new，要么都带中括号，要么都不带。然而可以在一个里面使用new初始化指针，在另一个里将指针初始化为空，因为delete可以用于空指针；
+- 应定义一个复制构造函数，实现深拷贝的对象初始化；
+- 应定义一个赋值运算符，实现深拷贝的对象复制；
+<br><br>
+
+# 12.4 有关返回对象的说明
+**...**
+<br><br>
+
+# 12.5 使用指向对象的指针
+使用对象指针时应注意的：
+- 使用常规表示来声明指向对象的指针：
+```c++
+String * glamour;
+```
+- 可以将指针初始化为指向已有的对象：
+```c++
+String * first = &saying[0];
+```
+- 可以使用new来初始化指针，这将创建一个新的对象：
+```c++
+String * favorite = new String(saying[choice]);
+```
+- 对类使用new将调用相应的类构造函数来初始化对象：
+```c++
+String * gleep = new String; // invokes default constructor
+String * glop = new String("my"); //invokes the String(const char *) constructor
+String * favorite = new String(saying[choice]); //invokes the String(const String &) constructor
+```
+- 可以使用->运算符通过指针访问类方法
+- 可以对对象指针应用解除引用运算符*来获得对象
+
+**后面两节还是要好好看一下的**
+# 12.6 复习各种技术
+# 12.7 队列模拟
