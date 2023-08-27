@@ -1,2 +1,2 @@
 # note
-Emmm, just a test for github.dev funciton. I've gotta to learn.
+Emmm, just a test for github.dev function. I've gotta to learn.
