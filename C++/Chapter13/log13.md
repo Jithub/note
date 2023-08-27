@@ -20,4 +20,111 @@
 共有继承建立一种 is-a 的关系，即得到的派生类 is-a-kind-of 基类。
 <br><br>
 
-# 13.3 多态共有继承
+# 13.3 多态公有继承
+同一个方法在基类和派生类中的行为是不同的，即方法的行为取决于调用该方法的对象，就叫多态。两种机制实现多态公有继承：
+- 在派生类中重新定义基类的方法
+- 使用虚方法
+
+如果方法是根据引用或指针而不是对象调用的，它将确定使用哪一种方法。
+- 如果**没有**关键字virtual，程序将根据引用或指针类型来选择方法；
+- 如果**使用**关键字virtual，程序将根据引用或指针指向的对象的类型来选择方法。
+```c++
+class Brass
+{
+public:
+    virtual void ViewAcct() const;
+    virtual ~Brass();
+};
+
+class BrassPlus : public Brass
+{
+public:
+    virtual void ViewAcct() const;
+};
+```
+看上面的基类和派生类，以引用为例，看下面的对比：
+```c++
+Brass dom;
+Brass dot;
+Brass & b1_ref = dom;
+BrassPlus & b2_ref = dot;
+/*假设没有关键字virtual，则：*/
+b1_ref.ViewAcct(); //调用方法为Brass::ViewAcct()
+b2_ref.ViewAcct(); //调用方法为Brass::ViewAcct()
+/*假设有关键字virtual，则：*/
+b1_ref.ViewAcct(); //调用方法为Brass::ViewAcct()
+b2_ref.ViewAcct(); //调用方法为BrassPlus::ViewAcct()
+```
+基类中声明的虚方法在派生类中会**自动**成为虚方法，但是在派生类声明中加上关键字比较好。  
+上面代码中声明一个虚析构函数是为了确保释放派生类对象时按正确的顺序调用析构函数。这是一种惯例。  
+正确顺序为：
+```c++
+Employee * pe = new Singer; //Employee是Singer的基类
+...
+delete pe;
+```
+如果有虚析构函数，将先调用Singer的析构函数释放有Singer组件指向的内存，然后调用Employee的析构函数释放Employee组件指向的内存。
+
+如果要在派生类中调用基类的虚方法，则应使用作用域解析运算符。
+
+# 13.4 静态联编和动态联编
+编译器负责回答程序调用函数时将使用哪个可执行代码块。将源代码中的函数调用解释为执行特定的函数代码块被称为函数名联编（binding）。在编译过程中完成联编被称为静态联编，或早期联编，而编译器必须能够在程序运行时选择正确的虚方法，则要进行动态联编，或晚期联编。
+
+## 指针和引用类型的兼容性
+将派生类引用或指针转换为基类引用或指针被称为向上强制转换（upcasting），这使得公有继承不需要进行显式类型转换。该规则是is-a关系的一部分，可以对基类对象执行的任何操作，都适用于派生类对象。向上强制转换是可传递的，即派生类的派生类也可以转换为基类。向下强制转换（downcasting）则必须使用显式。
+
+C++规定了虚方法的行为，但实现方法留给了编译器。  
+编译器处理虚函数的方法是：给每个对象添加一个隐藏成员，其中保存了一个指向函数地址数组的指针，该数组被称为虚函数表。  
+基类对象包含一个指针，指向基类中所有虚函数的地址表。  
+派生类对象包含的指针中，对于没有被重新定义的虚函数，将保存于基类相同的地址，否则保存新的地址。
+
+友元不能是虚函数，因为它不是类成员。
+
+两条经验规则：  
+1. 如果重新定义继承的方法，应确保与原来的原型完全相同（但如果返回类型是基类引用或指针，则可以修改为派生类的）
+2. 如果基类声明被重载了，则应在派生类中重新定义所有的基类版本。
+```c++
+class Dwelling
+{
+public:
+    virtual void showperks(int a) const;
+    virtual void showperks(double x) const;
+    virtual void showperks() const;
+}
+// 派生类中应全部声明：
+class Hovel : public Dwelling
+{
+public:
+    virtual void showperks(int a) const;
+    virtual void showperks(double x) const;
+    virtual void showperks() const;
+}
+```
+如果不想修改，则新定义可以只调用基类版本(以第三个为例)：
+```c++
+void Hovel::showperks() const {Dwelling::showperks();}
+```
+<br><br>
+
+# 13.5 访问控制：protected
+protected与private相似，只有在派生类中才会表现出区别。派生类的成员可以直接访问基类的protected成员，但不能直接访问基类的private成员。**也就是说，对外，protected=private；对内，protected=public。**  
+对于成员函数来说，保护访问控制很有用，它让派生类能够访问外部不能使用的内部函数。
+<br><br>
+
+# 13.6 抽象基类
+C++通过使用纯虚函数提供未实现的函数，纯虚函数结尾处为=0。  
+类声明中包含纯虚函数时，则不能创建该类的对象。  
+要成为真正的abstract base class(ABC)，必须至少包含一个纯虚函数。  
+C++允许纯虚函数有定义。  
+抽象基类对应的是具体类(concrete class)
+
+ABC要求具体派生类覆盖其纯虚函数。
+<br><br>
+
+# 13.7 继承和动态内存分配
+当基类和派生类都采用动态内存分配时，派生类的析构函数、复制构造函数、赋值运算符都必须使用相应的基类方法来处理基类元素。
+
+**派生类如何访问基类的友元：看够了看够了**
+<br><br>
+
+# 13.8 类设计回顾
