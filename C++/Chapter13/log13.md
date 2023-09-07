@@ -45,9 +45,9 @@ public:
 看上面的基类和派生类，以引用为例，看下面的对比：
 ```c++
 Brass dom;
-Brass dot;
+BrassPlus dot;
 Brass & b1_ref = dom;
-BrassPlus & b2_ref = dot;
+Brass & b2_ref = dot;
 /*假设没有关键字virtual，则：*/
 b1_ref.ViewAcct(); //调用方法为Brass::ViewAcct()
 b2_ref.ViewAcct(); //调用方法为Brass::ViewAcct()
@@ -56,16 +56,17 @@ b1_ref.ViewAcct(); //调用方法为Brass::ViewAcct()
 b2_ref.ViewAcct(); //调用方法为BrassPlus::ViewAcct()
 ```
 基类中声明的虚方法在派生类中会**自动**成为虚方法，但是在派生类声明中加上关键字比较好。  
-上面代码中声明一个虚析构函数是为了确保释放派生类对象时按正确的顺序调用析构函数。这是一种惯例。  
-正确顺序为：
+上面代码中声明一个虚析构函数是为了确保释放派生类对象时按正确的顺序调用析构函数。这是一种惯例。
+
+正确顺序为：如果有虚析构函数，将先调用Singer的析构函数释放有Singer组件指向的内存，然后调用Employee的析构函数释放Employee组件指向的内存。
 ```c++
 Employee * pe = new Singer; //Employee是Singer的基类
 ...
 delete pe;
 ```
-如果有虚析构函数，将先调用Singer的析构函数释放有Singer组件指向的内存，然后调用Employee的析构函数释放Employee组件指向的内存。
 
 如果要在派生类中调用基类的虚方法，则应使用作用域解析运算符。
+<br><br>
 
 # 13.4 静态联编和动态联编
 编译器负责回答程序调用函数时将使用哪个可执行代码块。将源代码中的函数调用解释为执行特定的函数代码块被称为函数名联编（binding）。在编译过程中完成联编被称为静态联编，或早期联编，而编译器必须能够在程序运行时选择正确的虚方法，则要进行动态联编，或晚期联编。
